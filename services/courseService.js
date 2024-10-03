@@ -1,24 +1,9 @@
 const express = require('express');
-const mysql = require('mysql2');
-const app = express();
-
-app.use(express.json());
-
-// MySQL connection
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'dbuserdbuser',
-    database: 'schedule_appointment_database'
-});
-
-db.connect(err => {
-    if (err) throw err;
-    console.log('Connected to MySQL');
-});
+const router = express.Router();
+const db = require('../config/db');
 
 // Create a new course
-app.post('/courses', (req, res) => {
+router.post('', (req, res) => {
     const { courseName } = req.body;
     const query = 'INSERT INTO courses (course_name) VALUES (?)';
 
@@ -29,7 +14,7 @@ app.post('/courses', (req, res) => {
 });
 
 // Update a course
-app.put('/courses/:id', (req, res) => {
+router.put('/:id', (req, res) => {
     const { id } = req.params;
     const { courseName } = req.body;
     const query = 'UPDATE courses SET course_name = ? WHERE id = ?';
@@ -41,7 +26,7 @@ app.put('/courses/:id', (req, res) => {
 });
 
 // Delete a course
-app.delete('/courses/:id', (req, res) => {
+router.delete('/:id', (req, res) => {
     const { id } = req.params;
     const query = 'DELETE FROM courses WHERE id = ?';
 
@@ -52,7 +37,7 @@ app.delete('/courses/:id', (req, res) => {
 });
 
 // Get all courses
-app.get('/courses', (req, res) => {
+router.get('', (req, res) => {
     const query = 'SELECT * FROM courses';
 
     db.query(query, (err, results) => {
@@ -61,8 +46,4 @@ app.get('/courses', (req, res) => {
     });
 });
 
-// Start server
-const PORT = process.env.PORT || 3003;
-app.listen(PORT, () => {
-    console.log(`Course Management Service running on port ${PORT}`);
-});
+module.exports = router;

@@ -1,24 +1,17 @@
 const express = require('express');
-const mysql = require('mysql2');
-const app = express();
+const router = express.Router();
+const db = require('../config/db');
 
-app.use(express.json());
-
-// MySQL connection
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'dbuserdbuser',
-    database: 'schedule_appointment_database'
-});
-
-db.connect(err => {
-    if (err) throw err;
-    console.log('Connected to MySQL');
+// Get all schedules
+router.get('', (req, res) => {
+    db.query("SELECT * FROM schedules", (err, results) => {
+        if (err) throw err;
+        res.json(results);
+    });
 });
 
 // Create a new schedule
-app.post('/schedules', (req, res) => {
+router.post('', (req, res) => {
     const { professorId, courseId, startTime, endTime, location } = req.body;
     const query = 'INSERT INTO schedules (professor_id, course_id, start_time, end_time, location) VALUES (?, ?, ?, ?, ?)';
 
@@ -29,7 +22,7 @@ app.post('/schedules', (req, res) => {
 });
 
 // Update a schedule
-app.put('/schedules/:id', (req, res) => {
+router.put('/:id', (req, res) => {
     const { id } = req.params;
     const { startTime, endTime, location } = req.body;
     const query = 'UPDATE schedules SET start_time = ?, end_time = ?, location = ? WHERE id = ?';
@@ -41,7 +34,7 @@ app.put('/schedules/:id', (req, res) => {
 });
 
 // Delete a schedule
-app.delete('/schedules/:id', (req, res) => {
+router.delete('/:id', (req, res) => {
     const { id } = req.params;
     const query = 'DELETE FROM schedules WHERE id = ?';
 
@@ -52,7 +45,7 @@ app.delete('/schedules/:id', (req, res) => {
 });
 
 // Get all schedules for a professor
-app.get('/schedules/:professorId', (req, res) => {
+router.get('/:professorId', (req, res) => {
     const { professorId } = req.params;
     const query = 'SELECT * FROM schedules WHERE professor_id = ?';
 
@@ -62,8 +55,4 @@ app.get('/schedules/:professorId', (req, res) => {
     });
 });
 
-// Start server
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`Schedule Management Service running on port ${PORT}`);
-});
+module.exports = router;

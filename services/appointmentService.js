@@ -1,24 +1,17 @@
 const express = require('express');
-const mysql = require('mysql2');
-const app = express();
+const router = express.Router();
+const db = require('../config/db');
 
-app.use(express.json());
-
-// MySQL connection
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'dbuserdbuser',
-    database: 'schedule_appointment_database'
-});
-
-db.connect(err => {
-    if (err) throw err;
-    console.log('Connected to MySQL');
+// Get all appointments
+router.get('', (req, res) => {
+    db.query("SELECT * FROM appointments", (err, results) => {
+        if (err) throw err;
+        res.json(results);
+    });
 });
 
 // Create an appointment
-app.post('/appointments', (req, res) => {
+router.post('', (req, res) => {
     const { studentId, scheduleId, startTime, endTime } = req.body;
     const query = 'INSERT INTO appointments (student_id, schedule_id, start_time, end_time) VALUES (?, ?, ?, ?)';
 
@@ -29,7 +22,7 @@ app.post('/appointments', (req, res) => {
 });
 
 // Update an appointment
-app.put('/appointments/:id', (req, res) => {
+router.put('/:id', (req, res) => {
     const { id } = req.params;
     const { startTime, endTime } = req.body;
     const query = 'UPDATE appointments SET start_time = ?, end_time = ? WHERE id = ?';
@@ -41,7 +34,7 @@ app.put('/appointments/:id', (req, res) => {
 });
 
 // Delete an appointment
-app.delete('/appointments/:id', (req, res) => {
+router.delete('/:id', (req, res) => {
     const { id } = req.params;
     const query = 'DELETE FROM appointments WHERE id = ?';
 
@@ -52,7 +45,7 @@ app.delete('/appointments/:id', (req, res) => {
 });
 
 // Get appointments for a student
-app.get('/appointments/:studentId', (req, res) => {
+router.get('/:studentId', (req, res) => {
     const { studentId } = req.params;
     const query = 'SELECT * FROM appointments WHERE student_id = ?';
 
@@ -62,8 +55,4 @@ app.get('/appointments/:studentId', (req, res) => {
     });
 });
 
-// Start server
-const PORT = process.env.PORT || 3002;
-app.listen(PORT, () => {
-    console.log(`Appointment Management Service running on port ${PORT}`);
-});
+module.exports = router;
