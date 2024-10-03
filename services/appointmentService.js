@@ -21,6 +21,17 @@ router.post('', (req, res) => {
     });
 });
 
+// Get an appointment by its id
+router.get('/:id', (req, res) => {
+    const { id } = req.params;
+    const query = 'SELECT * FROM appointments WHERE id = ?';
+
+    db.query(query, [id], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(result);
+    });
+});
+
 // Update an appointment
 router.put('/:id', (req, res) => {
     const { id } = req.params;
@@ -44,12 +55,23 @@ router.delete('/:id', (req, res) => {
     });
 });
 
-// Get appointments for a student
+// Get all appointments for a student
 router.get('/:studentId', (req, res) => {
     const { studentId } = req.params;
     const query = 'SELECT * FROM appointments WHERE student_id = ?';
 
     db.query(query, [studentId], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+// Get all appointments for a schedule
+router.get('/:scheduleId', (req, res) => {
+    const { scheduleId } = req.params;
+    const query = 'SELECT * FROM appointments WHERE schedule_id = ?';
+
+    db.query(query, [scheduleId], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
     });

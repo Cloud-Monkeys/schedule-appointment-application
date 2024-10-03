@@ -21,6 +21,17 @@ router.post('', (req, res) => {
     });
 });
 
+// Get a schedule by its id
+router.get('/:id', (req, res) => {
+    const { id } = req.params;
+    const query = 'SELECT * FROM schedules WHERE id = ?';
+
+    db.query(query, [id], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(result);
+    });
+});
+
 // Update a schedule
 router.put('/:id', (req, res) => {
     const { id } = req.params;
@@ -50,6 +61,17 @@ router.get('/:professorId', (req, res) => {
     const query = 'SELECT * FROM schedules WHERE professor_id = ?';
 
     db.query(query, [professorId], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+// Get all schedules for a course
+router.get('/:courseId', (req, res) => {
+    const { courseId } = req.params;
+    const query = 'SELECT * FROM schedules WHERE course_id = ?';
+
+    db.query(query, [courseId], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
     });

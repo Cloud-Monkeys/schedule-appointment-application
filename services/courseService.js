@@ -46,4 +46,15 @@ router.get('', (req, res) => {
     });
 });
 
+// Get a course by its id
+router.get('/:id', (req, res) => {
+    const { id } = req.params;
+    const query = 'SELECT * FROM courses WHERE id = ?';
+
+    db.query(query, [id], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(result);
+    });
+});
+
 module.exports = router;
