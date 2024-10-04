@@ -56,7 +56,7 @@ router.delete('/:id', (req, res) => {
 });
 
 // Get all schedules for a professor
-router.get('/:professorId', (req, res) => {
+router.get('/professors/:professorId', (req, res) => {
     const { professorId } = req.params;
     const query = 'SELECT * FROM schedules WHERE professor_id = ?';
 
@@ -67,7 +67,7 @@ router.get('/:professorId', (req, res) => {
 });
 
 // Get all schedules for a course
-router.get('/:courseId', (req, res) => {
+router.get('/courses/:courseId', (req, res) => {
     const { courseId } = req.params;
     const query = 'SELECT * FROM schedules WHERE course_id = ?';
 
