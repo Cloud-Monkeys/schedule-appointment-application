@@ -4,22 +4,22 @@ const db = require('../config/db');
 
 // Create a new course
 router.post('', (req, res) => {
-    const { course_name } = req.body;
-    const query = 'INSERT INTO courses (course_name) VALUES (?)';
+    const { course_code, course_name } = req.body;
+    const query = 'INSERT INTO courses (course_code, course_name) VALUES (?, ?)';
 
-    db.query(query, [course_name], (err, results) => {
+    db.query(query, [course_code, course_name], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.status(201).json({ id: results.insertId, course_name });
+        res.status(201).json({ id: results.insertId, course_code, course_name });
     });
 });
 
 // Update a course
 router.put('/:id', (req, res) => {
     const { id } = req.params;
-    const { course_name } = req.body;
-    const query = 'UPDATE courses SET course_name = ? WHERE id = ?';
+    const { course_code, course_name } = req.body;
+    const query = 'UPDATE courses SET course_code = ?, course_name = ? WHERE id = ?';
 
-    db.query(query, [course_name, id], (err, results) => {
+    db.query(query, [course_code, course_name, id], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ message: `${results.affectedRows} course found. ${results.changedRows} course updated successfully.` });
     });
