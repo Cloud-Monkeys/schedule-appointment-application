@@ -12,12 +12,12 @@ router.get('', (req, res) => {
 
 // Create an appointment
 router.post('', (req, res) => {
-    const { studentId, scheduleId, startTime, endTime } = req.body;
+    const { student_id, schedule_id, start_time, end_time } = req.body;
     const query = 'INSERT INTO appointments (student_id, schedule_id, start_time, end_time) VALUES (?, ?, ?, ?)';
 
-    db.query(query, [studentId, scheduleId, startTime, endTime], (err, result) => {
+    db.query(query, [student_id, schedule_id, start_time, end_time], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.status(201).json({ id: result.insertId, studentId, scheduleId, startTime, endTime });
+        res.status(201).json({ id: results.insertId, student_id, schedule_id, start_time, end_time });
     });
 });
 
@@ -26,21 +26,22 @@ router.get('/:id', (req, res) => {
     const { id } = req.params;
     const query = 'SELECT * FROM appointments WHERE id = ?';
 
-    db.query(query, [id], (err, result) => {
+    db.query(query, [id], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json(result);
+        res.json(results);
     });
 });
 
 // Update an appointment
 router.put('/:id', (req, res) => {
     const { id } = req.params;
-    const { startTime, endTime } = req.body;
+    const { start_time, end_time } = req.body;
     const query = 'UPDATE appointments SET start_time = ?, end_time = ? WHERE id = ?';
 
-    db.query(query, [startTime, endTime, id], (err, result) => {
+    db.query(query, [start_time, end_time, id], (err, results) => {
+
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Appointment updated successfully' });
+        res.json({ message: `${results.affectedRows} appointment found. ${results.changedRows} appointment updated successfully.` });
     });
 });
 
@@ -49,9 +50,10 @@ router.delete('/:id', (req, res) => {
     const { id } = req.params;
     const query = 'DELETE FROM appointments WHERE id = ?';
 
-    db.query(query, [id], (err, result) => {
+    db.query(query, [id], (err, results) => {
+
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Appointment canceled successfully' });
+        res.json({ message: `${results.affectedRows} appointment canceled successfully.` });
     });
 });
 
@@ -63,6 +65,18 @@ router.get('/students/:studentId', (req, res) => {
     db.query(query, [studentId], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
+    });
+});
+
+// Delete all appointments for a student (e.g., student account deleted or transferred/graduated)
+router.delete('/students/:studentId', (req, res) => {
+    const { studentId } = req.params;
+    const query = 'DELETE FROM appointments WHERE student_id = ?';
+
+    db.query(query, [studentId], (err, results) => {
+
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: `${results.affectedRows} appointments made by student ${studentId} canceled successfully.` });
     });
 });
 

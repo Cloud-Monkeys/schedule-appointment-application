@@ -4,24 +4,24 @@ const db = require('../config/db');
 
 // Create a new course
 router.post('', (req, res) => {
-    const { courseName } = req.body;
+    const { course_name } = req.body;
     const query = 'INSERT INTO courses (course_name) VALUES (?)';
 
-    db.query(query, [courseName], (err, result) => {
+    db.query(query, [course_name], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.status(201).json({ id: result.insertId, courseName });
+        res.status(201).json({ id: results.insertId, course_name });
     });
 });
 
 // Update a course
 router.put('/:id', (req, res) => {
     const { id } = req.params;
-    const { courseName } = req.body;
+    const { course_name } = req.body;
     const query = 'UPDATE courses SET course_name = ? WHERE id = ?';
 
-    db.query(query, [courseName, id], (err, result) => {
+    db.query(query, [course_name, id], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Course updated successfully' });
+        res.json({ message: `${results.affectedRows} course found. ${results.changedRows} course updated successfully.` });
     });
 });
 
@@ -30,9 +30,9 @@ router.delete('/:id', (req, res) => {
     const { id } = req.params;
     const query = 'DELETE FROM courses WHERE id = ?';
 
-    db.query(query, [id], (err, result) => {
+    db.query(query, [id], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Course deleted successfully' });
+        res.json({ message: `${results.affectedRows} course deleted successfully.` });
     });
 });
 
@@ -51,9 +51,9 @@ router.get('/:id', (req, res) => {
     const { id } = req.params;
     const query = 'SELECT * FROM courses WHERE id = ?';
 
-    db.query(query, [id], (err, result) => {
+    db.query(query, [id], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json(result);
+        res.json(results);
     });
 });
 

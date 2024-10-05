@@ -12,12 +12,12 @@ router.get('', (req, res) => {
 
 // Create a new schedule
 router.post('', (req, res) => {
-    const { professorId, courseId, startTime, endTime, location } = req.body;
+    const { professor_id, course_id, start_time, end_time, location } = req.body;
     const query = 'INSERT INTO schedules (professor_id, course_id, start_time, end_time, location) VALUES (?, ?, ?, ?, ?)';
 
-    db.query(query, [professorId, courseId, startTime, endTime, location], (err, result) => {
+    db.query(query, [professor_id, course_id, start_time, end_time, location], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.status(201).json({ id: result.insertId, professorId, courseId, startTime, endTime, location });
+        res.status(201).json({ id: results.insertId, professor_id, course_id, start_time, end_time, location });
     });
 });
 
@@ -26,21 +26,21 @@ router.get('/:id', (req, res) => {
     const { id } = req.params;
     const query = 'SELECT * FROM schedules WHERE id = ?';
 
-    db.query(query, [id], (err, result) => {
+    db.query(query, [id], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json(result);
+        res.json(results);
     });
 });
 
 // Update a schedule
 router.put('/:id', (req, res) => {
     const { id } = req.params;
-    const { startTime, endTime, location } = req.body;
+    const { start_time, end_time, location } = req.body;
     const query = 'UPDATE schedules SET start_time = ?, end_time = ?, location = ? WHERE id = ?';
 
-    db.query(query, [startTime, endTime, location, id], (err, result) => {
+    db.query(query, [start_time, end_time, location, id], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Schedule updated successfully' });
+        res.json({ message: `${results.affectedRows} schedule found. ${results.changedRows} schedule updated successfully.` });
     });
 });
 
@@ -49,9 +49,9 @@ router.delete('/:id', (req, res) => {
     const { id } = req.params;
     const query = 'DELETE FROM schedules WHERE id = ?';
 
-    db.query(query, [id], (err, result) => {
+    db.query(query, [id], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Schedule deleted successfully' });
+        res.json({ message: `${results.affectedRows} schedule deleted successfully.` });
     });
 });
 
@@ -63,6 +63,17 @@ router.get('/professors/:professorId', (req, res) => {
     db.query(query, [professorId], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
+    });
+});
+
+// Delete all schedules for a professor (e.g., professor account deleted or resigned/retired)
+router.delete('/professors/:professorId', (req, res) => {
+    const { professorId } = req.params;
+    const query = 'DELETE FROM schedules WHERE professor_id = ?';
+
+    db.query(query, [professorId], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: `${results.affectedRows} schedules created by professor ${professorId} deleted successfully.` });
     });
 });
 
