@@ -3,58 +3,63 @@ const router = express.Router();
 const db = require('../config/db');
 
 // Create a new course
-router.post('', (req, res) => {
+router.post('', async (req, res) => {
     const { course_code, course_name } = req.body;
     const query = 'INSERT INTO courses (course_code, course_name) VALUES (?, ?)';
-
-    db.query(query, [course_code, course_name], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [course_code, course_name]);
         res.status(201).json({ id: results.insertId, course_code, course_name });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Update a course
-router.put('/:id', (req, res) => {
-    const { id } = req.params;
+router.put('/:id', async (req, res) => {
+    const id = req.params.id;
     const { course_code, course_name } = req.body;
     const query = 'UPDATE courses SET course_code = ?, course_name = ? WHERE id = ?';
-
-    db.query(query, [course_code, course_name, id], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [course_code, course_name, id]);
         res.json({ message: `${results.affectedRows} course found. ${results.changedRows} course updated successfully.` });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Delete a course
-router.delete('/:id', (req, res) => {
-    const { id } = req.params;
+router.delete('/:id', async (req, res) => {
+    const id = req.params.id;
     const query = 'DELETE FROM courses WHERE id = ?';
-
-    db.query(query, [id], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [id]);
         res.json({ message: `${results.affectedRows} course deleted successfully.` });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Get all courses
-router.get('', (req, res) => {
+router.get('', async (req, res) => {
     const query = 'SELECT * FROM courses';
-
-    db.query(query, (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query);
         res.json(results);
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Get a course by its id
-router.get('/:id', (req, res) => {
-    const { id } = req.params;
+router.get('/:id', async (req, res) => {
+    const id = req.params.id;
     const query = 'SELECT * FROM courses WHERE id = ?';
-
-    db.query(query, [id], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [id]);
         res.json(results);
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 module.exports = router;

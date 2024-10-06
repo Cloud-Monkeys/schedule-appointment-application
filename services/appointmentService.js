@@ -3,92 +3,98 @@ const router = express.Router();
 const db = require('../config/db');
 
 // Get all appointments
-router.get('', (req, res) => {
-    db.query("SELECT * FROM appointments", (err, results) => {
-        if (err) throw err;
+router.get('', async (req, res) => {
+    try {
+        const [results] = await db.query("SELECT * FROM appointments");
         res.json(results);
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Create an appointment
-router.post('', (req, res) => {
+router.post('', async (req, res) => {
     const { student_id, schedule_id, start_time, end_time } = req.body;
     const query = 'INSERT INTO appointments (student_id, schedule_id, start_time, end_time) VALUES (?, ?, ?, ?)';
-
-    db.query(query, [student_id, schedule_id, start_time, end_time], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [student_id, schedule_id, start_time, end_time]);
         res.status(201).json({ id: results.insertId, student_id, schedule_id, start_time, end_time });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Get an appointment by its id
-router.get('/:id', (req, res) => {
-    const { id } = req.params;
+router.get('/:id', async (req, res) => {
+    const id = req.params.id;
     const query = 'SELECT * FROM appointments WHERE id = ?';
-
-    db.query(query, [id], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [id]);
         res.json(results);
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Update an appointment
-router.put('/:id', (req, res) => {
-    const { id } = req.params;
+router.put('/:id', async (req, res) => {
+    const id = req.params.id;
     const { start_time, end_time } = req.body;
     const query = 'UPDATE appointments SET start_time = ?, end_time = ? WHERE id = ?';
-
-    db.query(query, [start_time, end_time, id], (err, results) => {
-
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [start_time, end_time, id]);
         res.json({ message: `${results.affectedRows} appointment found. ${results.changedRows} appointment updated successfully.` });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Delete an appointment
-router.delete('/:id', (req, res) => {
-    const { id } = req.params;
+router.delete('/:id', async (req, res) => {
+    const id = req.params.id;
     const query = 'DELETE FROM appointments WHERE id = ?';
-
-    db.query(query, [id], (err, results) => {
-
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [id]);
         res.json({ message: `${results.affectedRows} appointment canceled successfully.` });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Get all appointments for a student
-router.get('/students/:studentId', (req, res) => {
+router.get('/students/:studentId', async (req, res) => {
     const { studentId } = req.params;
     const query = 'SELECT * FROM appointments WHERE student_id = ?';
-
-    db.query(query, [studentId], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [studentId]);
         res.json(results);
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Delete all appointments for a student (e.g., student account deleted or transferred/graduated)
-router.delete('/students/:studentId', (req, res) => {
+router.delete('/students/:studentId', async (req, res) => {
     const { studentId } = req.params;
     const query = 'DELETE FROM appointments WHERE student_id = ?';
-
-    db.query(query, [studentId], (err, results) => {
-
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [studentId]);
         res.json({ message: `${results.affectedRows} appointments made by student ${studentId} canceled successfully.` });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Get all appointments for a schedule
-router.get('/schedules/:scheduleId', (req, res) => {
+router.get('/schedules/:scheduleId', async (req, res) => {
     const { scheduleId } = req.params;
     const query = 'SELECT * FROM appointments WHERE schedule_id = ?';
-
-    db.query(query, [scheduleId], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [scheduleId]);
         res.json(results);
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 module.exports = router;

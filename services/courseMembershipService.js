@@ -3,80 +3,87 @@ const router = express.Router();
 const db = require('../config/db');
 
 // Create a new course membership (student registers or professor is assigned)
-router.post('', (req, res) => {
+router.post('', async (req, res) => {
     const { user_id, course_id } = req.body;
     const query = 'INSERT INTO course_memberships (user_id, course_id) VALUES (?, ?)';
-
-    db.query(query, [user_id, course_id], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [user_id, course_id]);
         res.status(201).json({ id: results.insertId, user_id, course_id });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Update a course membership
-router.put('/:id', (req, res) => {
-    const { id } = req.params;
+router.put('/:id', async (req, res) => {
+    const id = req.params.id;
     const { user_id, course_id } = req.body;
     const query = 'UPDATE course_memberships SET user_id = ?, course_id = ? WHERE id = ?';
-
-    db.query(query, [user_id, course_id, id], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [user_id, course_id, id]);
         res.json({ message: `${results.affectedRows} course membership found. ${results.changedRows} course membership updated successfully.` });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Delete a course membership
-router.delete('/:id', (req, res) => {
-    const { id } = req.params;
+router.delete('/:id', async (req, res) => {
+    const id = req.params.id;
     const query = 'DELETE FROM course_memberships WHERE id = ?';
-
-    db.query(query, [id], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [id]);
         res.json({ message: `${results.affectedRows} course membership deleted successfully.` });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Get all course memberships
-router.get('', (req, res) => {
+router.get('', async (req, res) => {
     const query = 'SELECT * FROM course_memberships';
-
-    db.query(query, (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query);
         res.json(results);
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Get a course membership by its id
-router.get('/:id', (req, res) => {
-    const { id } = req.params;
+router.get('/:id', async (req, res) => {
+    const id = req.params.id;
     const query = 'SELECT * FROM course_memberships WHERE id = ?';
-
-    db.query(query, [id], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [id]);
         res.json(results);
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Get all course memberships for a user
-router.get('/users/:userId', (req, res) => {
+router.get('/users/:userId', async (req, res) => {
     const { userId } = req.params;
     const query = 'SELECT * FROM course_memberships WHERE user_id = ?';
-
-    db.query(query, [userId], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [userId]);
         res.json(results);
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Delete all course memberships for a user (e.g., user account deletion)
-router.delete('/users/:userId', (req, res) => {
+router.delete('/users/:userId', async (req, res) => {
     const { userId } = req.params;
     const query = 'DELETE FROM course_memberships WHERE user_id = ?';
-
-    db.query(query, [userId], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+    try {
+        const [results] = await db.query(query, [userId]);
         res.json({ message: `${results.affectedRows} course memberships associated with user ${userId} deleted successfully.` });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 module.exports = router;
