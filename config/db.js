@@ -1,4 +1,3 @@
-require('dotenv').config();
 const mysql = require('mysql2/promise'); // Import the promise version of mysql2
 
 // Create the connection pool to use async/await with promises

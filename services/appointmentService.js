@@ -2,21 +2,15 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
 
-
-async function getAllAppointments(res) {
+// Get all appointments
+router.get('', async (req, res) => {
     try {
         const [results] = await db.query("SELECT * FROM appointments");
         res.json(results);
     } catch (err) {
         res.status(500).json({ error: err.message });
-    } 
-}
-
-router.get('', async (req, res) => {
-    getAllAppointments(res);
+    }
 });
-
-
 
 // Create an appointment
 router.post('', async (req, res) => {
@@ -55,17 +49,17 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// Force update an appointment
-router.post('', async (req, res) => {
-    const { student_id, schedule_id, start_time, end_time } = req.body;
-    const query = 'INSERT INTO appointments (student_id, schedule_id, start_time, end_time) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE appointments SET student_id=?, start_time=?, end_time=?';
-    try {
-        const [results] = await db.query(query, [student_id, schedule_id, start_time, end_time, student_id, start_time, end_time]);
-        res.status(201).json({ id: results.insertId, student_id, schedule_id, start_time, end_time });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+// // Force update an appointment
+// router.post('', async (req, res) => {
+//     const { student_id, schedule_id, start_time, end_time } = req.body;
+//     const query = 'INSERT INTO appointments (student_id, schedule_id, start_time, end_time) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE appointments SET student_id=?, start_time=?, end_time=?';
+//     try {
+//         const [results] = await db.query(query, [student_id, schedule_id, start_time, end_time, student_id, start_time, end_time]);
+//         res.status(201).json({ id: results.insertId, student_id, schedule_id, start_time, end_time });
+//     } catch (err) {
+//         res.status(500).json({ error: err.message });
+//     }
+// });
 
 // Delete an appointment
 router.delete('/:id', async (req, res) => {
