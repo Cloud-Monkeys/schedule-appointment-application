@@ -62,11 +62,11 @@ router.delete('/:id', async (req, res) => {
 });
 
 // Get all schedules for a professor
-router.get('/professors/:professorId', async (req, res) => {
-    const { professorId } = req.params;
-    const query = 'SELECT * FROM schedules WHERE professor_id = ?';
+router.get('/users/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const query = 'SELECT * FROM schedules WHERE user_id = ?';
     try {
-        const [results] = await db.query(query, [professorId]);
+        const [results] = await db.query(query, [userId]);
         res.json(results);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -74,23 +74,23 @@ router.get('/professors/:professorId', async (req, res) => {
 });
 
 // Delete all schedules for a professor (e.g., professor account deleted or resigned/retired)
-router.delete('/professors/:professorId', async (req, res) => {
-    const { professorId } = req.params;
-    const query = 'DELETE FROM schedules WHERE professor_id = ?';
+router.delete('/users/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const query = 'DELETE FROM schedules WHERE user_id = ?';
     try {
-        const [results] = await db.query(query, [professorId]);
-        res.json({ message: `${results.affectedRows} schedules created by professor ${professorId} deleted successfully.` });
+        const [results] = await db.query(query, [userId]);
+        res.json({ message: `${results.affectedRows} schedules created by professor ${userId} deleted successfully.` });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// Get all schedules for a course
-router.get('/courses/:courseId', async (req, res) => {
-    const { courseId } = req.params;
-    const query = 'SELECT * FROM schedules WHERE course_id = ?';
+// Get all schedules for a section
+router.get('/sections/:sectionId', async (req, res) => {
+    const { sectionId } = req.params;
+    const query = 'SELECT * FROM schedules WHERE section_id = ?';
     try {
-        const [results] = await db.query(query, [courseId]);
+        const [results] = await db.query(query, [sectionId]);
         res.json(results);
     } catch (err) {
         res.status(500).json({ error: err.message });

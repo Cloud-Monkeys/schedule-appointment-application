@@ -74,11 +74,11 @@ router.delete('/:id', async (req, res) => {
 });
 
 // Get all appointments for a student
-router.get('/students/:studentId', async (req, res) => {
-    const { studentId } = req.params;
-    const query = 'SELECT * FROM appointments WHERE student_id = ?';
+router.get('/users/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const query = 'SELECT * FROM appointments WHERE user_id = ?';
     try {
-        const [results] = await db.query(query, [studentId]);
+        const [results] = await db.query(query, [userId]);
         res.json(results);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -86,12 +86,12 @@ router.get('/students/:studentId', async (req, res) => {
 });
 
 // Delete all appointments for a student (e.g., student account deleted or transferred/graduated)
-router.delete('/students/:studentId', async (req, res) => {
-    const { studentId } = req.params;
-    const query = 'DELETE FROM appointments WHERE student_id = ?';
+router.delete('/users/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const query = 'DELETE FROM appointments WHERE user_id = ?';
     try {
-        const [results] = await db.query(query, [studentId]);
-        res.json({ message: `${results.affectedRows} appointments made by student ${studentId} canceled successfully.` });
+        const [results] = await db.query(query, [userId]);
+        res.json({ message: `${results.affectedRows} appointments made by student ${userId} canceled successfully.` });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
