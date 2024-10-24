@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const db = require('../config/db');
 const Schedule = require('./schedule');
 
-const Appointment = db.define('Appointment', {
+const Appointment = db.define('appointment', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
