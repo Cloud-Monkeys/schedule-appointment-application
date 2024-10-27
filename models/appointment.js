@@ -32,6 +32,10 @@ const Appointment = db.define('appointment', {
         type: DataTypes.DATE,
         allowNull: false,
         field: 'end_time'
+    },
+    description: {
+        type: DataTypes.STRING,
+        allowNull: false
     }
 }, {
     timestamps: false,
@@ -45,7 +49,7 @@ const Appointment = db.define('appointment', {
     indexes: [
         {
             unique: true,
-            fields: ['user_id', 'schedule_id', 'start_time', 'end_time']
+            fields: ['user_id', 'schedule_id', 'start_time', 'end_time', 'description']
         }
     ]
 });
