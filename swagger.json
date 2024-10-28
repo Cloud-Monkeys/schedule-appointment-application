@@ -1,0 +1,356 @@
+{
+  "definitions": {},
+  "info": {
+    "title": "Schedule Appointment API",
+    "version": "1.0.0",
+    "license": {
+      "name": "ISC"
+    },
+    "description": "API for managing schedules and appointments"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "/",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {},
+        "tags": []
+      }
+    },
+    "/schedules": {
+      "get": {
+        "summary": "/schedules",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {},
+        "tags": []
+      },
+      "post": {
+        "summary": "/schedules",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {},
+        "tags": []
+      }
+    },
+    "/schedules/{id}": {
+      "get": {
+        "summary": "/schedules/{id}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {},
+        "tags": []
+      },
+      "put": {
+        "summary": "/schedules/{id}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {},
+        "tags": []
+      },
+      "delete": {
+        "summary": "/schedules/{id}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {},
+        "tags": []
+      }
+    },
+    "/schedules/users/{userId}": {
+      "get": {
+        "summary": "/schedules/users/{userId}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {},
+        "tags": []
+      },
+      "delete": {
+        "summary": "/schedules/users/{userId}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {},
+        "tags": []
+      }
+    },
+    "/schedules/sections/{sectionId}": {
+      "get": {
+        "summary": "/schedules/sections/{sectionId}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "sectionId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {},
+        "tags": []
+      }
+    },
+    "/appointments": {
+      "get": {
+        "summary": "/appointments",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number"
+                      },
+                      "userId": {
+                        "type": "string"
+                      },
+                      "scheduleId": {
+                        "type": "number"
+                      },
+                      "startTime": {
+                        "type": "string"
+                      },
+                      "endTime": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "userId",
+                      "scheduleId",
+                      "startTime",
+                      "endTime",
+                      "description"
+                    ]
+                  },
+                  "example": [
+                    {
+                      "id": 12,
+                      "userId": "ed567",
+                      "scheduleId": 6,
+                      "startTime": "2024-03-28T13:30:00.000Z",
+                      "endTime": "2024-03-28T14:00:00.000Z",
+                      "description": "Course Selection"
+                    }
+                  ]
+                },
+                "pagination": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "number",
+                      "example": 20
+                    },
+                    "page": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "limit": {
+                      "type": "number",
+                      "example": 10
+                    },
+                    "totalPages": {
+                      "type": "number",
+                      "example": 2
+                    }
+                  }
+                },
+                "_links": {
+                  "type": "object",
+                  "properties": {
+                    "self": {
+                      "type": "string",
+                      "example": "http://localhost:3000/appointments?page=1&limit=10"
+                    },
+                    "first": {
+                      "type": "string",
+                      "example": "http://localhost:3000/appointments?page=1&limit=10"
+                    },
+                    "last": {
+                      "type": "string",
+                      "example": "http://localhost:3000/appointments?page=2&limit=10"
+                    },
+                    "next": {
+                      "type": "string",
+                      "example": "http://localhost:3000/appointments?page=2&limit=10"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/json"
+        ]
+      },
+      "post": {
+        "summary": "/appointments",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {},
+        "tags": []
+      }
+    },
+    "/appointments/{id}": {
+      "get": {
+        "summary": "/appointments/{id}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {},
+        "tags": []
+      },
+      "put": {
+        "summary": "/appointments/{id}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {},
+        "tags": []
+      },
+      "delete": {
+        "summary": "/appointments/{id}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {},
+        "tags": []
+      }
+    },
+    "/appointments/users/{userId}": {
+      "get": {
+        "summary": "/appointments/users/{userId}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {},
+        "tags": []
+      },
+      "delete": {
+        "summary": "/appointments/users/{userId}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {},
+        "tags": []
+      }
+    },
+    "/appointments/schedules/{scheduleId}": {
+      "get": {
+        "summary": "/appointments/schedules/{scheduleId}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "scheduleId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {},
+        "tags": []
+      }
+    }
+  },
+  "swagger": "2.0",
+  "tags": []
+}

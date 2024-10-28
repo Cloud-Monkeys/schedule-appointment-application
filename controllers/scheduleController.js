@@ -1,10 +1,48 @@
 const Schedule = require('../models/schedule');
 
-// Get all schedules
+// Get all schedules with pagination
 const getSchedules = async (req, res) => {
     try {
-        const schedules = await Schedule.findAll();
-        res.json(schedules);
+        // Get pagination parameters from query string
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        // Get paginated data and total count
+        const { count, rows: schedules } = await Schedule.findAndCountAll({
+            limit,
+            offset,
+            order: [['startTime', 'DESC']]
+        });
+
+        // Calculate total pages
+        const totalPages = Math.ceil(count / limit);
+        
+        // Generate pagination links
+        const baseUrl = `${req.protocol}://${req.get('host')}/schedules`;
+        const links = {
+            self: `${baseUrl}?page=${page}&limit=${limit}`,
+            first: `${baseUrl}?page=1&limit=${limit}`,
+            last: `${baseUrl}?page=${totalPages}&limit=${limit}`
+        };
+        
+        if (page > 1) links.prev = `${baseUrl}?page=${page-1}&limit=${limit}`;
+        if (page < totalPages) links.next = `${baseUrl}?page=${page+1}&limit=${limit}`;
+
+        // Set Link header
+        res.links(links);
+
+        // Send response
+        res.json({
+            data: schedules,
+            pagination: {
+                total: count,
+                page,
+                limit,
+                totalPages
+            },
+            _links: links
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
