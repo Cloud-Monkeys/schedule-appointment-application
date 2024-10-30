@@ -1,26 +1,120 @@
 require('dotenv').config();
 const express = require('express');
-const expressOasGenerator = require('express-oas-generator');
 const cors = require('cors');
 const app = express();
 const db = require('./config/db');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 // First middleware setup
 app.use(express.json());
 app.use(cors());
 
 // Setup OpenAPI documentation
-expressOasGenerator.handleResponses(app, {
-    swaggerUiServePath: 'api-docs',
-    specOutputPath: './swagger.json',
-    predefinedSpec: {
+const options = {
+    definition: {
+        openapi: '3.0.0',
         info: {
             title: 'Schedule Appointment API',
             version: '1.0.0',
             description: 'API for managing schedules and appointments'
+        },
+        components: {
+            schemas: {
+                Schedule: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'integer' },
+                        userId: { type: 'string' },
+                        sectionId: { type: 'integer' },
+                        startTime: { type: 'string', format: 'date-time' },
+                        endTime: { type: 'string', format: 'date-time' },
+                        location: { type: 'string' }
+                    }
+                },
+                Appointment: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'integer' },
+                        userId: { type: 'string' },
+                        scheduleId: { type: 'integer' },
+                        startTime: { type: 'string', format: 'date-time' },
+                        endTime: { type: 'string', format: 'date-time' },
+                        description: { type: 'string' }
+                    }
+                },
+                Pagination: {
+                    type: 'object',
+                    properties: {
+                        total: {
+                            type: 'integer',
+                            description: 'Total number of items'
+                        },
+                        page: {
+                            type: 'integer',
+                            description: 'Current page number'
+                        },
+                        limit: {
+                            type: 'integer',
+                            description: 'Number of items per page'
+                        },
+                        totalPages: {
+                            type: 'integer',
+                            description: 'Total number of pages'
+                        }
+                    }
+                },
+                Links: {
+                    type: 'object',
+                    properties: {
+                        self: {
+                            type: 'string',
+                            description: 'URL of the current page'
+                        },
+                        first: {
+                            type: 'string',
+                            description: 'URL of the first page'
+                        },
+                        prev: {
+                            type: 'string',
+                            description: 'URL of the previous page'
+                        },
+                        next: {
+                            type: 'string',
+                            description: 'URL of the next page'
+                        },
+                        last: {
+                            type: 'string',
+                            description: 'URL of the last page'
+                        }
+                    }
+                },
+                Error: {
+                    type: 'object',
+                    properties: {
+                        message: {
+                            type: 'string',
+                            description: 'Error message'
+                        },
+                        code: {
+                            type: 'string',
+                            description: 'Error code'
+                        },
+                        details: {
+                            type: 'object',
+                            description: 'Additional error details'
+                        }
+                    },
+                    required: ['message']
+                }
+            }
         }
-    }
-});
+    },
+    apis: ['./routes/*.js'], // Path to the API docs
+};
+
+const specs = swaggerJsdoc(options);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Routes
 app.get('/', (req, res) => {
@@ -39,9 +133,6 @@ const appointmentRoutes = require('./routes/appointmentRoutes');
 
 app.use('/schedules', scheduleRoutes);
 app.use('/appointments', appointmentRoutes);
-
-// Initialize request handling for OpenAPI
-expressOasGenerator.handleRequests();
 
 // Database sync and server start
 db.sync({ force: false })
