@@ -78,33 +78,19 @@ const getAppointments = async (req, res) => {
 const getAppointmentById = async (req, res) => {
     try {
         const appointment = await Appointment.findByPk(req.params.id);
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        
         if (appointment) {
-            // Generate the base URL for our API
-            const baseUrl = `${req.protocol}://${req.get('host')}`;
-            
-            // Add _links section to the appointment response
+            // Add _links section using our utility
             appointment.dataValues._links = {
-                // Link to this appointment
                 self: {
                     href: `${baseUrl}/appointments/${appointment.id}`,
                     method: 'GET'
                 },
-                // Link to related schedule
-                schedule: {
-                    href: `${baseUrl}/schedules/${appointment.scheduleId}`,
-                    method: 'GET'
-                },
-                // Link to related user
-                user: {
-                    href: `${baseUrl}/users/${appointment.userId}`,
-                    method: 'GET'
-                },
-                // Link to all appointments
                 collection: {
                     href: `${baseUrl}/appointments`,
                     method: 'GET'
                 },
-                // Available actions
                 update: {
                     href: `${baseUrl}/appointments/${appointment.id}`,
                     method: 'PUT'
@@ -112,6 +98,15 @@ const getAppointmentById = async (req, res) => {
                 delete: {
                     href: `${baseUrl}/appointments/${appointment.id}`,
                     method: 'DELETE'
+                },
+                // Related resources
+                schedule: {
+                    href: `${baseUrl}/schedules/${appointment.scheduleId}`,
+                    method: 'GET'
+                },
+                user: {
+                    href: `${baseUrl}/users/${appointment.userId}`,
+                    method: 'GET'
                 }
             };
             
@@ -251,6 +246,14 @@ const bulkUpdateAppointments = async (req, res) => {
 };
 
 const errorHandler = (err, req, res, next) => {
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const links = {
+        collection: {
+            href: `${baseUrl}/appointments`,
+            method: 'GET'
+        }
+    };
+
     if (err.name === 'SequelizeValidationError') {
         return res.status(400).json({
             status: 'error',
@@ -259,7 +262,8 @@ const errorHandler = (err, req, res, next) => {
             details: err.errors.map(e => ({
                 field: e.path,
                 message: e.message
-            }))
+            })),
+            _links: links
         });
     }
 
@@ -267,7 +271,8 @@ const errorHandler = (err, req, res, next) => {
         return res.status(409).json({
             status: 'error',
             code: 'CONFLICT',
-            message: 'Resource already exists'
+            message: 'Resource already exists',
+            _links: links
         });
     }
 
@@ -275,7 +280,8 @@ const errorHandler = (err, req, res, next) => {
     res.status(500).json({
         status: 'error',
         code: 'INTERNAL_ERROR',
-        message: 'An unexpected error occurred'
+        message: 'An unexpected error occurred',
+        _links: links
     });
 };
 

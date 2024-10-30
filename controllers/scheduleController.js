@@ -50,20 +50,6 @@ const getSchedules = async (req, res) => {
     }
 };
 
-// Get a schedule by its id
-const getScheduleById = async (req, res) => {
-    try {
-        const schedule = await Schedule.findByPk(req.params.id);
-        if (schedule) {
-            res.json(schedule);
-        } else {
-            res.status(404).json({ message: 'Schedule not found' });
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
-
 // Create a new schedule
 const createSchedule = async (req, res) => {
     try {
@@ -146,9 +132,65 @@ const getSchedulesBySectionId = async (req, res) => {
         const schedules = await Schedule.findAll({
             where: { sectionId }
         });
-        res.json(schedules);
+
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        
+        // Add links to each schedule
+        const schedulesWithLinks = schedules.map(schedule => ({
+            ...schedule.toJSON(),
+            _links: {
+                self: {
+                    href: `${baseUrl}/schedules/${schedule.id}`,
+                    method: 'GET'
+                },
+                update: {
+                    href: `${baseUrl}/schedules/${schedule.id}`,
+                    method: 'PUT'
+                },
+                delete: {
+                    href: `${baseUrl}/schedules/${schedule.id}`,
+                    method: 'DELETE'
+                },
+                // Related resources
+                section: {
+                    href: `${baseUrl}/sections/${schedule.sectionId}`,
+                    method: 'GET'
+                },
+                appointments: {
+                    href: `${baseUrl}/schedules/${schedule.id}/appointments`,
+                    method: 'GET'
+                }
+            }
+        }));
+
+        // Add collection-level links
+        res.json({
+            data: schedulesWithLinks,
+            _links: {
+                self: {
+                    href: `${baseUrl}/sections/${sectionId}/schedules`,
+                    method: 'GET'
+                },
+                section: {
+                    href: `${baseUrl}/sections/${sectionId}`,
+                    method: 'GET'
+                },
+                create: {
+                    href: `${baseUrl}/schedules`,
+                    method: 'POST'
+                }
+            }
+        });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ 
+            error: err.message,
+            _links: {
+                self: {
+                    href: `${req.protocol}://${req.get('host')}/sections/${sectionId}/schedules`,
+                    method: 'GET'
+                }
+            }
+        });
     }
 };
 
@@ -157,19 +199,23 @@ const updateScheduleAsync = async (req, res) => {
     try {
         const scheduleId = req.params.id;
         const schedule = await Schedule.findByPk(scheduleId);
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
         
         if (!schedule) {
-            return res.status(404).json({ message: 'Schedule not found' });
+            return res.status(404).json({ 
+                message: 'Schedule not found',
+                _links: {
+                    collection: {
+                        href: `${baseUrl}/schedules`,
+                        method: 'GET'
+                    }
+                }
+            });
         }
 
-        // Generate a unique operation ID using crypto instead of uuid
         const operationId = crypto.randomUUID();
-        
-        // Create status URL where client can check progress
-        const baseUrl = `${req.protocol}://${req.get('host')}`;
         const statusUrl = `${baseUrl}/operations/${operationId}`;
 
-        // Store the operation details in cache/database
         await cache.set(operationId, {
             status: 'processing',
             resourceType: 'schedule',
@@ -178,20 +224,41 @@ const updateScheduleAsync = async (req, res) => {
             data: req.body
         });
 
-        // Process the update asynchronously
         processScheduleUpdate(operationId, schedule, req.body).catch(console.error);
 
-        // Return 202 with the status URL
         res.status(202)
            .setHeader('Location', statusUrl)
            .json({
                message: 'Update request accepted',
                statusUrl: statusUrl,
-               operationId: operationId
+               operationId: operationId,
+               _links: {
+                   status: {
+                       href: statusUrl,
+                       method: 'GET'
+                   },
+                   schedule: {
+                       href: `${baseUrl}/schedules/${scheduleId}`,
+                       method: 'GET'
+                   },
+                   cancel: {
+                       href: `${baseUrl}/operations/${operationId}`,
+                       method: 'DELETE'
+                   }
+               }
            });
 
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        res.status(400).json({ 
+            error: err.message,
+            _links: {
+                collection: {
+                    href: `${baseUrl}/schedules`,
+                    method: 'GET'
+                }
+            }
+        });
     }
 };
 
@@ -236,6 +303,74 @@ const getOperationStatus = async (req, res) => {
     // If operation is complete, return 200, otherwise return 202
     const status = operation.status === 'completed' ? 200 : 202;
     res.status(status).json(operation);
+};
+
+// Add a new method to get a single schedule by ID
+const getScheduleById = async (req, res) => {
+    try {
+        const schedule = await Schedule.findByPk(req.params.id);
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        
+        if (schedule) {
+            const response = {
+                ...schedule.toJSON(),
+                _links: {
+                    self: {
+                        href: `${baseUrl}/schedules/${schedule.id}`,
+                        method: 'GET'
+                    },
+                    collection: {
+                        href: `${baseUrl}/schedules`,
+                        method: 'GET'
+                    },
+                    update: {
+                        href: `${baseUrl}/schedules/${schedule.id}`,
+                        method: 'PUT'
+                    },
+                    delete: {
+                        href: `${baseUrl}/schedules/${schedule.id}`,
+                        method: 'DELETE'
+                    },
+                    // Related resources
+                    section: {
+                        href: `${baseUrl}/sections/${schedule.sectionId}`,
+                        method: 'GET'
+                    },
+                    user: {
+                        href: `${baseUrl}/users/${schedule.userId}`,
+                        method: 'GET'
+                    },
+                    appointments: {
+                        href: `${baseUrl}/schedules/${schedule.id}/appointments`,
+                        method: 'GET'
+                    }
+                }
+            };
+            
+            res.json(response);
+        } else {
+            res.status(404).json({ 
+                message: 'Schedule not found',
+                _links: {
+                    collection: {
+                        href: `${baseUrl}/schedules`,
+                        method: 'GET'
+                    }
+                }
+            });
+        }
+    } catch (err) {
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        res.status(500).json({ 
+            error: err.message,
+            _links: {
+                collection: {
+                    href: `${baseUrl}/schedules`,
+                    method: 'GET'
+                }
+            }
+        });
+    }
 };
 
 module.exports = {

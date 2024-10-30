@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(cors());
 
 // Setup OpenAPI documentation
-const options = {
+const swaggerOptions = {
     definition: {
         openapi: '3.0.0',
         info: {
@@ -113,7 +113,7 @@ const options = {
     apis: ['./routes/*.js'], // Path to the API docs
 };
 
-const specs = swaggerJsdoc(options);
+const specs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Routes
