@@ -1,5 +1,5 @@
 const express = require('express');
-const { getSchedules, getScheduleById, createSchedule, updateSchedule, deleteSchedule, getSchedulesByUserId, deleteSchedulesByUserId, getSchedulesBySectionId } = require('../controllers/scheduleController');
+const { getSchedules, getScheduleById, createSchedule, updateSchedule, deleteSchedule, getSchedulesByUserId, deleteSchedulesByUserId, getSchedulesBySectionId, updateScheduleAsync, getOperationStatus } = require('../controllers/scheduleController');
 const router = express.Router();
 
 /**
@@ -331,6 +331,92 @@ const router = express.Router();
  *               $ref: '#/components/schemas/Error'
  */
 
+/**
+ * @openapi
+ * /schedules/{id}/async:
+ *   put:
+ *     summary: Asynchronously update a schedule
+ *     description: Starts an asynchronous update operation for a schedule
+ *     tags: [Schedules]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The schedule ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Schedule'
+ *     responses:
+ *       202:
+ *         description: Update request accepted
+ *         headers:
+ *           Location:
+ *             schema:
+ *               type: string
+ *             description: URL to check the status of the operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Update request accepted
+ *                 statusUrl:
+ *                   type: string
+ *                   example: http://api.example.com/operations/123e4567-e89b-12d3-a456-426614174000
+ *                 operationId:
+ *                   type: string
+ *                   example: 123e4567-e89b-12d3-a456-426614174000
+ * 
+ * /operations/{operationId}:
+ *   get:
+ *     summary: Get operation status
+ *     description: Check the status of an asynchronous operation
+ *     tags: [Operations]
+ *     parameters:
+ *       - in: path
+ *         name: operationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The operation ID
+ *     responses:
+ *       200:
+ *         description: Operation completed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   enum: [completed, failed]
+ *                 result:
+ *                   $ref: '#/components/schemas/Schedule'
+ *       202:
+ *         description: Operation still processing
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   enum: [processing]
+ *       404:
+ *         description: Operation not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 // Define routes for Schedule resource
 router.get('', getSchedules);
 router.get('/:id', getScheduleById);
@@ -340,5 +426,7 @@ router.delete('/:id', deleteSchedule);
 router.get('/users/:userId', getSchedulesByUserId);
 router.delete('/users/:userId', deleteSchedulesByUserId);
 router.get('/sections/:sectionId', getSchedulesBySectionId);
+router.put('/:id/async', updateScheduleAsync);
+router.get('/operations/:operationId', getOperationStatus);
 
 module.exports = router;

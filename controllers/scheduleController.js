@@ -1,4 +1,6 @@
 const Schedule = require('../models/schedule');
+const crypto = require('crypto');
+const cache = require('../utils/cache');
 
 // Get all schedules with pagination
 const getSchedules = async (req, res) => {
@@ -66,6 +68,15 @@ const getScheduleById = async (req, res) => {
 const createSchedule = async (req, res) => {
     try {
         const newSchedule = await Schedule.create(req.body);
+        
+        // Generate the URL for the newly created resource
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        const resourceUrl = `${baseUrl}/schedules/${newSchedule.id}`;
+        
+        // Set the Location header
+        res.setHeader('Location', resourceUrl);
+        
+        // Return 201 status with the created resource
         res.status(201).json(newSchedule);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -141,6 +152,92 @@ const getSchedulesBySectionId = async (req, res) => {
     }
 };
 
+// Update schedule details asynchronously
+const updateScheduleAsync = async (req, res) => {
+    try {
+        const scheduleId = req.params.id;
+        const schedule = await Schedule.findByPk(scheduleId);
+        
+        if (!schedule) {
+            return res.status(404).json({ message: 'Schedule not found' });
+        }
+
+        // Generate a unique operation ID using crypto instead of uuid
+        const operationId = crypto.randomUUID();
+        
+        // Create status URL where client can check progress
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        const statusUrl = `${baseUrl}/operations/${operationId}`;
+
+        // Store the operation details in cache/database
+        await cache.set(operationId, {
+            status: 'processing',
+            resourceType: 'schedule',
+            resourceId: scheduleId,
+            operation: 'update',
+            data: req.body
+        });
+
+        // Process the update asynchronously
+        processScheduleUpdate(operationId, schedule, req.body).catch(console.error);
+
+        // Return 202 with the status URL
+        res.status(202)
+           .setHeader('Location', statusUrl)
+           .json({
+               message: 'Update request accepted',
+               statusUrl: statusUrl,
+               operationId: operationId
+           });
+
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
+// Async processing function
+async function processScheduleUpdate(operationId, schedule, updateData) {
+    try {
+        // Simulate long-running task
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        // Perform the update
+        await schedule.update(updateData);
+
+        // Update operation status to complete
+        await cache.set(operationId, {
+            status: 'completed',
+            resourceType: 'schedule',
+            resourceId: schedule.id,
+            operation: 'update',
+            result: schedule
+        });
+    } catch (error) {
+        // Update operation status to failed
+        await cache.set(operationId, {
+            status: 'failed',
+            resourceType: 'schedule',
+            resourceId: schedule.id,
+            operation: 'update',
+            error: error.message
+        });
+    }
+}
+
+// Endpoint to check operation status
+const getOperationStatus = async (req, res) => {
+    const operationId = req.params.operationId;
+    const operation = await cache.get(operationId);
+
+    if (!operation) {
+        return res.status(404).json({ message: 'Operation not found' });
+    }
+
+    // If operation is complete, return 200, otherwise return 202
+    const status = operation.status === 'completed' ? 200 : 202;
+    res.status(status).json(operation);
+};
+
 module.exports = {
     getSchedules,
     getScheduleById,
@@ -149,5 +246,7 @@ module.exports = {
     deleteSchedule,
     getSchedulesByUserId,
     deleteSchedulesByUserId,
-    getSchedulesBySectionId
+    getSchedulesBySectionId,
+    updateScheduleAsync,
+    getOperationStatus
 };

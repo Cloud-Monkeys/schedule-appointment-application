@@ -323,6 +323,106 @@ const router = express.Router();
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
+ *
+ * @swagger
+ * /appointments/{id}/async:
+ *   put:
+ *     summary: Asynchronously update an appointment
+ *     tags: [Appointments]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Appointment ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               startTime:
+ *                 type: string
+ *                 format: date-time
+ *               endTime:
+ *                 type: string
+ *                 format: date-time
+ *               userId:
+ *                 type: string
+ *               scheduleId:
+ *                 type: string
+ *     responses:
+ *       202:
+ *         description: Update request accepted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Update request accepted
+ *                 statusUrl:
+ *                   type: string
+ *                   example: /operations/123e4567-e89b-12d3-a456-426614174000
+ *                 operationId:
+ *                   type: string
+ *                   example: 123e4567-e89b-12d3-a456-426614174000
+ *       404:
+ *         description: Appointment not found
+ *       400:
+ *         description: Invalid input
+ *
+ * /operations/{operationId}:
+ *   get:
+ *     summary: Get the status of an async operation
+ *     tags: [Operations]
+ *     parameters:
+ *       - in: path
+ *         name: operationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Operation ID
+ *     responses:
+ *       200:
+ *         description: Operation completed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   enum: [completed, processing, failed]
+ *                 resourceType:
+ *                   type: string
+ *                   example: appointment
+ *                 resourceId:
+ *                   type: string
+ *                 operation:
+ *                   type: string
+ *                   example: update
+ *                 result:
+ *                   type: object
+ *                   description: The updated resource (when status is completed)
+ *                 error:
+ *                   type: string
+ *                   description: Error message (when status is failed)
+ *       202:
+ *         description: Operation still processing
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: processing
+ *       404:
+ *         description: Operation not found
  */
 router.get('', getAppointments);
 router.get('/:id', getAppointmentById);

@@ -1,5 +1,7 @@
 const Appointment = require('../models/appointment');
 const { Op } = require('sequelize');
+const crypto = require('crypto');
+const cache = require('../utils/cache');
 
 // Get all appointments with pagination
 const getAppointments = async (req, res) => {
@@ -134,8 +136,15 @@ const getAppointmentById = async (req, res) => {
 const createAppointment = async (req, res) => {
     try {
         const newAppointment = await Appointment.create(req.body);
-        const baseUrl = `${req.protocol}://${req.get('host')}/appointments`;
-        res.setHeader('Location', `${baseUrl}/${newAppointment.id}`);
+        
+        // Generate the URL for the newly created resource
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        const resourceUrl = `${baseUrl}/appointments/${newAppointment.id}`;
+        
+        // Set the Location header
+        res.setHeader('Location', resourceUrl);
+        
+        // Return 201 status with the created resource
         res.status(201).json(newAppointment);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -270,6 +279,77 @@ const errorHandler = (err, req, res, next) => {
     });
 };
 
+const updateAppointmentAsync = async (req, res) => {
+    try {
+        const appointmentId = req.params.id;
+        const appointment = await Appointment.findByPk(appointmentId);
+        
+        if (!appointment) {
+            return res.status(404).json({ message: 'Appointment not found' });
+        }
+
+        // Generate a unique operation ID
+        const operationId = crypto.randomUUID();
+        
+        // Create status URL where client can check progress
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        const statusUrl = `${baseUrl}/operations/${operationId}`;
+
+        // Store the operation details in cache
+        await cache.set(operationId, {
+            status: 'processing',
+            resourceType: 'appointment',
+            resourceId: appointmentId,
+            operation: 'update',
+            data: req.body
+        });
+
+        // Process the update asynchronously
+        processAppointmentUpdate(operationId, appointment, req.body).catch(console.error);
+
+        // Return 202 with the status URL
+        res.status(202)
+           .setHeader('Location', statusUrl)
+           .json({
+               message: 'Update request accepted',
+               statusUrl: statusUrl,
+               operationId: operationId
+           });
+
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
+// Async processing function
+async function processAppointmentUpdate(operationId, appointment, updateData) {
+    try {
+        // Simulate long-running task
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        // Perform the update
+        await appointment.update(updateData);
+
+        // Update operation status to complete
+        await cache.set(operationId, {
+            status: 'completed',
+            resourceType: 'appointment',
+            resourceId: appointment.id,
+            operation: 'update',
+            result: appointment
+        });
+    } catch (error) {
+        // Update operation status to failed
+        await cache.set(operationId, {
+            status: 'failed',
+            resourceType: 'appointment',
+            resourceId: appointment.id,
+            operation: 'update',
+            error: error.message
+        });
+    }
+}
+
 module.exports = {
     getAppointments,
     getAppointmentById,
@@ -278,5 +358,6 @@ module.exports = {
     deleteAppointment,
     getAppointmentsByUserId,
     deleteAppointmentsByUserId,
-    getAppointmentsByScheduleId
+    getAppointmentsByScheduleId,
+    updateAppointmentAsync
 };
