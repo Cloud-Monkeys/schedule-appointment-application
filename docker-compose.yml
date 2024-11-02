@@ -1,6 +1,7 @@
 #version: '3'
 services:
   node-app:
+    image: nw2568/schedule-appointment-app
     build: .
     ports:
       - "80:3000"
