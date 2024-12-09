@@ -2,6 +2,34 @@ const Appointment = require('../models/appointment');
 const { Op } = require('sequelize');
 const crypto = require('crypto');
 const cache = require('../utils/cache');
+const snsService = require('../services/snsService');
+
+// SNS Topic ARN - you'll need to create this topic in AWS SNS and put the ARN here
+const APPOINTMENT_TOPIC_ARN = process.env.APPOINTMENT_TOPIC_ARN;
+
+// Helper function to send SNS notifications
+const sendAppointmentNotification = async (action, appointment) => {
+    try {
+        if (!APPOINTMENT_TOPIC_ARN) {
+            console.warn('APPOINTMENT_TOPIC_ARN not set. Skipping notification.');
+            return;
+        }
+
+        const message = {
+            action,
+            appointmentId: appointment.id,
+            startTime: appointment.startTime,
+            endTime: appointment.endTime,
+            status: appointment.status,
+            timestamp: new Date().toISOString()
+        };
+
+        await snsService.publishMessage(APPOINTMENT_TOPIC_ARN, message);
+    } catch (error) {
+        console.error('Failed to send SNS notification:', error);
+        // Don't throw the error to prevent it from affecting the main operation
+    }
+};
 
 // Get all appointments with pagination
 const getAppointments = async (req, res) => {
@@ -130,34 +158,76 @@ const getAppointmentById = async (req, res) => {
 // Create a new appointment
 const createAppointment = async (req, res) => {
     try {
-        const newAppointment = await Appointment.create(req.body);
+        const appointment = await Appointment.create(req.body);
         
-        // Generate the URL for the newly created resource
-        const baseUrl = `${req.protocol}://${req.get('host')}`;
-        const resourceUrl = `${baseUrl}/appointments/${newAppointment.id}`;
+        // Send notification for new appointment
+        await sendAppointmentNotification('APPOINTMENT_CREATED', appointment);
         
-        // Set the Location header
-        res.setHeader('Location', resourceUrl);
-        
-        // Return 201 status with the created resource
-        res.status(201).json(newAppointment);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
+        res.status(201).json({
+            success: true,
+            data: appointment
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            error: error.message
+        });
     }
 };
 
-// Update appointment details
+// Update an appointment
 const updateAppointment = async (req, res) => {
     try {
         const appointment = await Appointment.findByPk(req.params.id);
-        if (appointment) {
-            await appointment.update(req.body);
-            res.json(appointment);
-        } else {
-            res.status(404).json({ message: 'Appointment not found' });
+        if (!appointment) {
+            return res.status(404).json({
+                success: false,
+                error: 'Appointment not found'
+            });
         }
-    } catch (err) {
-        res.status(400).json({ error: err.message });
+
+        await appointment.update(req.body);
+        
+        // Send notification for updated appointment
+        await sendAppointmentNotification('APPOINTMENT_UPDATED', appointment);
+
+        res.status(200).json({
+            success: true,
+            data: appointment
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            error: error.message
+        });
+    }
+};
+
+// Cancel an appointment
+const cancelAppointment = async (req, res) => {
+    try {
+        const appointment = await Appointment.findByPk(req.params.id);
+        if (!appointment) {
+            return res.status(404).json({
+                success: false,
+                error: 'Appointment not found'
+            });
+        }
+
+        await appointment.update({ status: 'cancelled' });
+        
+        // Send notification for cancelled appointment
+        await sendAppointmentNotification('APPOINTMENT_CANCELLED', appointment);
+
+        res.status(200).json({
+            success: true,
+            data: appointment
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            error: error.message
+        });
     }
 };
 

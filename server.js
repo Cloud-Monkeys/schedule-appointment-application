@@ -6,6 +6,11 @@ const db = require('./config/db');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
+// Import routes
+const subscriptionRoutes = require('./routes/subscriptionRoutes');
+const scheduleRoutes = require('./routes/scheduleRoutes');
+const appointmentRoutes = require('./routes/appointmentRoutes');
+
 // First middleware setup
 app.use(express.json());
 app.use(cors());
@@ -19,6 +24,12 @@ const swaggerOptions = {
             version: '1.0.0',
             description: 'API for managing schedules and appointments'
         },
+        tags: [
+            {
+                name: 'Subscription',
+                description: 'Subscription management endpoints'
+            }
+        ],
         components: {
             schemas: {
                 Schedule: {
@@ -123,16 +134,15 @@ app.get('/', (req, res) => {
         endpoints: {
             schedules: '/schedules',
             appointments: '/appointments',
+            subscriptions: '/subscriptions',
             docs: '/api-docs'
         }
     });
 });
 
-const scheduleRoutes = require('./routes/scheduleRoutes');
-const appointmentRoutes = require('./routes/appointmentRoutes');
-
 app.use('/schedules', scheduleRoutes);
 app.use('/appointments', appointmentRoutes);
+app.use('/subscriptions', subscriptionRoutes);
 
 // Database sync and server start
 db.sync({ force: false })
