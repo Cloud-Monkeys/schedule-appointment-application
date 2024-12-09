@@ -6,6 +6,9 @@ const db = require('./config/db');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
+// Import routes
+const subscriptionRoutes = require('./routes/subscriptionRoutes');
+
 // First middleware setup
 app.use(express.json());
 app.use(cors());
@@ -133,6 +136,7 @@ const appointmentRoutes = require('./routes/appointmentRoutes');
 
 app.use('/schedules', scheduleRoutes);
 app.use('/appointments', appointmentRoutes);
+app.use('/subscriptions', subscriptionRoutes);
 
 // Database sync and server start
 db.sync({ force: false })
