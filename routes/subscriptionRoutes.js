@@ -6,6 +6,7 @@ const subscriptionService = require('../services/subscriptionService');
  * @swagger
  * /subscriptions/email:
  *   post:
+ *     tags: [Subscription]
  *     summary: Subscribe an email to appointment notifications
  *     requestBody:
  *       required: true
@@ -38,6 +39,7 @@ router.post('/email', async (req, res) => {
  * @swagger
  * /subscriptions/sms:
  *   post:
+ *     tags: [Subscription]
  *     summary: Subscribe a phone number to SMS notifications
  *     requestBody:
  *       required: true
@@ -70,6 +72,7 @@ router.post('/sms', async (req, res) => {
  * @swagger
  * /subscriptions/https:
  *   post:
+ *     tags: [Subscription]
  *     summary: Subscribe an HTTPS endpoint to notifications
  *     requestBody:
  *       required: true
