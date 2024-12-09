@@ -47,7 +47,7 @@ const {
  *                 _links:
  *                   $ref: '#/components/schemas/Links'
  */
-router.get('/', getSchedules);
+router.get('', getSchedules);
 
 /**
  * @swagger
@@ -65,7 +65,7 @@ router.get('/', getSchedules);
  *       201:
  *         description: Schedule created successfully
  */
-router.post('/', createSchedule);
+router.post('', createSchedule);
 
 /**
  * @swagger

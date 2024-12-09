@@ -1,5 +1,5 @@
 const express = require('express');
-const { getAppointments, getAppointmentById, createAppointment, updateAppointment, deleteAppointment, getAppointmentsByUserId, deleteAppointmentsByUserId, getAppointmentsByScheduleId } = require('../controllers/appointmentController');
+const { getAppointments, getAppointmentById, createAppointment, updateAppointment, deleteAppointment, getAppointmentsByScheduleId } = require('../controllers/appointmentController');
 const router = express.Router();
 
 /**
@@ -425,12 +425,12 @@ const router = express.Router();
  *         description: Operation not found
  */
 router.get('', getAppointments);
-router.get('/:id', getAppointmentById);
 router.post('', createAppointment);
+router.get('/:id', getAppointmentById);
 router.put('/:id', updateAppointment);
 router.delete('/:id', deleteAppointment);
-router.get('/users/:userId', getAppointmentsByUserId);
-router.delete('/users/:userId', deleteAppointmentsByUserId);
+// router.get('/users/:userId', getAppointmentsByUserId);
+// router.delete('/users/:userId', deleteAppointmentsByUserId);
 router.get('/schedules/:scheduleId', getAppointmentsByScheduleId);
 
 module.exports = router;
