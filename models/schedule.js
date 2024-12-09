@@ -8,7 +8,7 @@ const Schedule = db.define('schedule', {
         autoIncrement: true
     },
     userId: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(10),
         allowNull: false,
         field: 'user_id'
     },
@@ -28,7 +28,7 @@ const Schedule = db.define('schedule', {
         field: 'end_time'
     },
     location: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(100),
         allowNull: false
     }
 }, {

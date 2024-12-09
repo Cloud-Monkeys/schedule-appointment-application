@@ -8,11 +8,6 @@ const Appointment = db.define('appointment', {
         primaryKey: true,
         autoIncrement: true
     },
-    userId: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        field: 'user_id'
-    },
     scheduleId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -49,7 +44,7 @@ const Appointment = db.define('appointment', {
     indexes: [
         {
             unique: true,
-            fields: ['user_id', 'schedule_id', 'start_time', 'end_time', 'description']
+            fields: ['schedule_id', 'start_time', 'end_time', 'description']
         }
     ]
 });

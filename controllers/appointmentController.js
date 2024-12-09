@@ -176,31 +176,31 @@ const deleteAppointment = async (req, res) => {
     }
 };
 
-// Get all appointments for a student
-const getAppointmentsByUserId = async (req, res) => {
-    const { userId } = req.params;
-    try {
-        const appointments = await Appointment.findAll({
-            where: { userId }
-        });
-        res.json(appointments);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
-
-// Delete all appointments for a student (e.g., student account deleted or transferred/graduated)
-const deleteAppointmentsByUserId = async (req, res) => {
-    const { userId } = req.params;
-    try {
-        const result = await Appointment.destroy({
-            where: { userId }
-        });
-        res.json({ message: `${result} appointments made by student ${userId} canceled.` });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
+// // Get all appointments for a student
+// const getAppointmentsByUserId = async (req, res) => {
+//     const { userId } = req.params;
+//     try {
+//         const appointments = await Appointment.findAll({
+//             where: { userId }
+//         });
+//         res.json(appointments);
+//     } catch (err) {
+//         res.status(500).json({ error: err.message });
+//     }
+// };
+//
+// // Delete all appointments for a student (e.g., student account deleted or transferred/graduated)
+// const deleteAppointmentsByUserId = async (req, res) => {
+//     const { userId } = req.params;
+//     try {
+//         const result = await Appointment.destroy({
+//             where: { userId }
+//         });
+//         res.json({ message: `${result} appointments made by student ${userId} canceled.` });
+//     } catch (err) {
+//         res.status(500).json({ error: err.message });
+//     }
+// };
 
 // Get all appointments for a schedule
 const getAppointmentsByScheduleId = async (req, res) => {
@@ -362,8 +362,7 @@ module.exports = {
     createAppointment,
     updateAppointment,
     deleteAppointment,
-    getAppointmentsByUserId,
-    deleteAppointmentsByUserId,
-    getAppointmentsByScheduleId,
-    updateAppointmentAsync
+    // getAppointmentsByUserId,
+    // deleteAppointmentsByUserId,
+    getAppointmentsByScheduleId
 };
