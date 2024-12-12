@@ -47,7 +47,6 @@ const swaggerOptions = {
                     type: 'object',
                     properties: {
                         id: { type: 'integer' },
-                        userId: { type: 'string' },
                         scheduleId: { type: 'integer' },
                         startTime: { type: 'string', format: 'date-time' },
                         endTime: { type: 'string', format: 'date-time' },

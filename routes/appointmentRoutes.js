@@ -240,62 +240,6 @@ const router = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *
- * /appointments/users/{userId}:
- *   get:
- *     summary: Get appointments by user ID
- *     description: Retrieves all appointments for a specific user
- *     tags: [Appointments]
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: string
- *         description: The user ID
- *     responses:
- *       200:
- *         description: Successfully retrieved appointments
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Appointment'
- *       404:
- *         description: No appointments found for this user
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *   delete:
- *     summary: Delete all appointments for a user
- *     description: Deletes all appointments associated with a specific user ID
- *     tags: [Appointments]
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: string
- *         description: The user ID
- *     responses:
- *       200:
- *         description: Appointments deleted successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "All appointments for user deleted"
- *       404:
- *         description: No appointments found for this user
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *
  * /appointments/schedules/{scheduleId}:
  *   get:
  *     summary: Get appointments by schedule ID
@@ -429,8 +373,6 @@ router.post('', createAppointment);
 router.get('/:id', getAppointmentById);
 router.put('/:id', updateAppointment);
 router.delete('/:id', deleteAppointment);
-// router.get('/users/:userId', getAppointmentsByUserId);
-// router.delete('/users/:userId', deleteAppointmentsByUserId);
 router.get('/schedules/:scheduleId', getAppointmentsByScheduleId);
 
 module.exports = router;
