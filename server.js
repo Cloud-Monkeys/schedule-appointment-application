@@ -24,6 +24,12 @@ const swaggerOptions = {
             version: '1.0.0',
             description: 'API for managing schedules and appointments'
         },
+        servers: [
+            {
+                url: ``,
+                description: 'Development server',
+            },
+        ],
         tags: [
             {
                 name: 'Subscription',
