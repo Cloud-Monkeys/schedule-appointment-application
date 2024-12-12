@@ -26,11 +26,13 @@ class SNSService {
         }
     }
 
-    async publishMessage(topicArn, message) {
+    async publishMessage(topicArn, message, subject = null) {
         try {
             const command = new PublishCommand({
                 TopicArn: topicArn,
-                Message: JSON.stringify(message)
+                Message: JSON.stringify(message),
+                Subject: subject,
+                MessageStructure: 'json'
             });
             return await this.snsClient.send(command);
         } catch (error) {
