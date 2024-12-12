@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const crypto = require('crypto');
 const cache = require('../utils/cache');
 const snsService = require('../services/snsService');
+const { getAppointmentEmailTemplate } = require('../services/emailTemplateService');
 
 // SNS Topic ARN - you'll need to create this topic in AWS SNS and put the ARN here
 const APPOINTMENT_TOPIC_ARN = process.env.APPOINTMENT_TOPIC_ARN;
@@ -15,19 +16,24 @@ const sendAppointmentNotification = async (action, appointment) => {
             return;
         }
 
+        const template = getAppointmentEmailTemplate(action, appointment);
+        
         const message = {
-            action,
-            appointmentId: appointment.id,
-            startTime: appointment.startTime,
-            endTime: appointment.endTime,
-            status: appointment.status,
-            timestamp: new Date().toISOString()
+            default: JSON.stringify({
+                action,
+                appointmentId: appointment.id,
+                startTime: appointment.startTime,
+                endTime: appointment.endTime,
+                status: appointment.status,
+                timestamp: new Date().toISOString()
+            }),
+            email: template.message,
+            sms: `Your appointment on ${new Date(appointment.startTime).toLocaleDateString()} has been ${action.toLowerCase().replace('APPOINTMENT_', '')}`
         };
 
-        await snsService.publishMessage(APPOINTMENT_TOPIC_ARN, message);
+        await snsService.publishMessage(APPOINTMENT_TOPIC_ARN, message, template.subject);
     } catch (error) {
         console.error('Failed to send SNS notification:', error);
-        // Don't throw the error to prevent it from affecting the main operation
     }
 };
 
