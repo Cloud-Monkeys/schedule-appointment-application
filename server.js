@@ -5,6 +5,9 @@ const app = express();
 const db = require('./config/db');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const { v4: uuidv4 } = require("uuid");
+const {join} = require("node:path");
+const {existsSync, writeFileSync, readFileSync} = require("node:fs");
 
 // Import routes
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
@@ -14,6 +17,53 @@ const appointmentRoutes = require('./routes/appointmentRoutes');
 // First middleware setup
 app.use(express.json());
 app.use(cors());
+
+const logFilePath = join(__dirname, "log.json");
+
+if (!existsSync(logFilePath)) {
+    writeFileSync(logFilePath, JSON.stringify([]));
+}
+
+app.use((req, res, next) => {
+    const traceId = req.headers["x-trace-id"] || uuidv4();
+    const spanId = uuidv4();
+
+    req.headers["x-trace-id"] = traceId;
+
+    const logEntry = {
+        timestamp: new Date().toISOString(),
+        method: req.method,
+        url: req.originalUrl,
+        traceId: traceId,
+        spanId: spanId,
+        statusCode: 0,
+    };
+
+    console.log(`[TRACE] Request Received`);
+    console.log(`  Method: ${logEntry.method}`);
+    console.log(`  URL: ${logEntry.url}`);
+    console.log(`  TraceId: ${logEntry.traceId}`);
+    console.log(`  SpanId: ${logEntry.spanId}`);
+
+    res.on("finish", () => {
+        logEntry.statusCode = res.statusCode;
+
+        console.log(`[TRACE] Response Sent`);
+        console.log(`  Status Code: ${logEntry.statusCode}`);
+        console.log(`  TraceId: ${logEntry.traceId}`);
+        console.log(`  SpanId: ${logEntry.spanId}`);
+
+        try {
+            const currentLogs = JSON.parse(readFileSync(logFilePath, "utf8"));
+            currentLogs.push(logEntry);
+            writeFileSync(logFilePath, JSON.stringify(currentLogs, null, 2));
+        } catch (err) {
+            console.error("Failed to write log to log.json:", err);
+        }
+    });
+
+    next();
+});
 
 // Setup OpenAPI documentation
 const swaggerOptions = {
