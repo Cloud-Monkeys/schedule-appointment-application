@@ -1,4 +1,5 @@
 node_modules/
 .idea/
-*.sql
-#.env
+log.json
+.env
+docker-compose.yml
