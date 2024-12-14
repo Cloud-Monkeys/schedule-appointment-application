@@ -165,10 +165,7 @@ const createAppointment = async (req, res) => {
         // Send notification for new appointment
         await sendAppointmentNotification('APPOINTMENT_CREATED', appointment);
         
-        res.status(201).json({
-            success: true,
-            data: appointment
-        });
+        res.status(201).json(appointment);
     } catch (error) {
         res.status(400).json({
             success: false,
@@ -193,10 +190,7 @@ const updateAppointment = async (req, res) => {
         // Send notification for updated appointment
         await sendAppointmentNotification('APPOINTMENT_UPDATED', appointment);
 
-        res.status(200).json({
-            success: true,
-            data: appointment
-        });
+        res.status(200).json(appointment);
     } catch (error) {
         res.status(400).json({
             success: false,

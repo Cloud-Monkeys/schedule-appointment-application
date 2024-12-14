@@ -164,23 +164,7 @@ const getSchedulesBySectionId = async (req, res) => {
         }));
 
         // Add collection-level links
-        res.json({
-            data: schedulesWithLinks,
-            _links: {
-                self: {
-                    href: `${baseUrl}/sections/${sectionId}/schedules`,
-                    method: 'GET'
-                },
-                section: {
-                    href: `${baseUrl}/sections/${sectionId}`,
-                    method: 'GET'
-                },
-                create: {
-                    href: `${baseUrl}/schedules`,
-                    method: 'POST'
-                }
-            }
-        });
+        res.json(schedulesWithLinks);
     } catch (err) {
         res.status(500).json({ 
             error: err.message,
